@@ -4,8 +4,9 @@ public class VehicleRegistrationService(HttpClient httpClient)
 {
     public async Task<VehicleInfo> GetVehicleInfo(string licenseNumber)
     {
-        // Invoke VehicleRegistrationService via FineCollectionService's own Dapr sidecar 
+        // Because the HttpClient passed into this class has already been created for a certain app-id, you can omit
+        // the host information from the request URL. 
         return await httpClient.GetFromJsonAsync<VehicleInfo>(
-            $"http://localhost:3601/v1.0/invoke/vehicleregistrationservice/method/vehicleinfo/{licenseNumber}");
+            $"/vehicleinfo/{licenseNumber}");
     }
 }
