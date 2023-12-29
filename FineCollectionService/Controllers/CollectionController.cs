@@ -17,10 +17,7 @@ public class CollectionController : ControllerBase
         _vehicleRegistrationService = vehicleRegistrationService;
 
         // set finecalculator component license-key
-        if (_fineCalculatorLicenseKey == null)
-        {
-            _fineCalculatorLicenseKey = config.GetValue<string>("fineCalculatorLicenseKey");
-        }
+        _fineCalculatorLicenseKey ??= config.GetValue<string>("fineCalculatorLicenseKey");
     }
 
     [Route("collectfine")]
@@ -33,13 +30,21 @@ public class CollectionController : ControllerBase
         var vehicleInfo = await _vehicleRegistrationService.GetVehicleInfo(speedingViolation.VehicleId);
 
         // log fine
-        string fineString = fine == 0 ? "tbd by the prosecutor" : $"{fine} Euro";
-        _logger.LogInformation($"Sent speeding ticket to {vehicleInfo.OwnerName}. " +
-            $"Road: {speedingViolation.RoadId}, Licensenumber: {speedingViolation.VehicleId}, " +
-            $"Vehicle: {vehicleInfo.Brand} {vehicleInfo.Model}, " +
-            $"Violation: {speedingViolation.ViolationInKmh} Km/h, Fine: {fineString}, " +
-            $"On: {speedingViolation.Timestamp.ToString("dd-MM-yyyy")} " +
-            $"at {speedingViolation.Timestamp.ToString("hh:mm:ss")}.");
+        var fineString = fine == 0 ? "tbd by the prosecutor" : $"{fine} Euro";
+        
+        _logger.LogInformation("Sent speeding ticket to {OwnerName}. " +
+            "Road: {RoadId}, License Number: {VehicleId}, Vehicle: {Brand} {Model}, " +
+            "Violation: {ViolationInKmh} Km/h, Fine: {FineString}, " +
+            "On: {Date} at {Time}", 
+            vehicleInfo.OwnerName, 
+            speedingViolation.RoadId, 
+            speedingViolation.VehicleId,
+            vehicleInfo.Brand, 
+            vehicleInfo.Model, 
+            speedingViolation.ViolationInKmh, 
+            fineString, 
+            speedingViolation.Timestamp.ToString("dd-MM-yyyy"),
+            speedingViolation.Timestamp.ToString("hh:mm:ss"));
 
         // send fine by email
         // TODO
