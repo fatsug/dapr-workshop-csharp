@@ -60,4 +60,19 @@ public class CollectionController : ControllerBase
 
         return Ok();
     }
+    
+    [Route("/dapr/subscribe")]
+    [HttpGet()]
+    public object Subscribe()
+    {
+        return new object[]
+        {
+            new
+            {
+                pubsubname = "pubsub",
+                topic = "speedingviolations",
+                route = "/collectfine"
+            }
+        };
+    }
 }
