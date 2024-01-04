@@ -40,7 +40,7 @@ public class TrafficController(
     }
 
     [HttpPost("exitcam")]
-    public async Task<ActionResult> VehicleExit(VehicleRegistered msg)
+    public async Task<ActionResult> VehicleExit(VehicleRegistered msg, [FromServices] DaprClient daprClient)
     {
         try
         {
@@ -82,8 +82,7 @@ public class TrafficController(
             };
 
             // publish speedingviolation
-            var message = JsonContent.Create<SpeedingViolation>(speedingViolation);
-            await httpClient.PostAsync("http://localhost:3600/v1.0/publish/pubsub/speedingviolations", message);
+            await daprClient.PublishEventAsync("pubsub", "speedingviolations", speedingViolation);
 
             return Ok();
         }
