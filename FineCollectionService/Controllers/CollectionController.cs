@@ -12,14 +12,16 @@ public class CollectionController : ControllerBase
     private readonly VehicleRegistrationService _vehicleRegistrationService;
 
     public CollectionController(IConfiguration config, ILogger<CollectionController> logger,
-        IFineCalculator fineCalculator, VehicleRegistrationService vehicleRegistrationService)
+        IFineCalculator fineCalculator, VehicleRegistrationService vehicleRegistrationService, DaprClient daprClient)
     {
         _logger = logger;
         _fineCalculator = fineCalculator;
         _vehicleRegistrationService = vehicleRegistrationService;
 
         // set finecalculator component license-key
-        _fineCalculatorLicenseKey ??= config.GetValue<string>("fineCalculatorLicenseKey");
+        var secrets = daprClient.GetSecretAsync(
+            "trafficcontrol-secrets", "finecalculator.licensekey").Result;
+        _fineCalculatorLicenseKey = secrets["finecalculator.licensekey"];
     }
 
     [Topic("pubsub", "speedingviolations")]
