@@ -1,109 +1,96 @@
 namespace Simulation;
 
-public class CameraSimulation
+public class CameraSimulation(int camNumber, ITrafficControlService trafficControlService)
 {
-    private readonly ITrafficControlService _trafficControlService;
-    private Random _rnd;
-    private int _camNumber;
-    private int _minEntryDelayInMS = 50;
-    private int _maxEntryDelayInMS = 5000;
-    private int _minExitDelayInS = 4;
-    private int _maxExitDelayInS = 10;
-
-    public CameraSimulation(int camNumber, ITrafficControlService trafficControlService)
-    {
-        _rnd = new Random();
-        _camNumber = camNumber;
-        _trafficControlService = trafficControlService;
-    }
+    private readonly Random _rnd = new();
+    private const int MinEntryDelayInMs = 50;
+    private const int MaxEntryDelayInMs = 5000;
+    private const int MinExitDelayInS = 4;
+    private const int MaxExitDelayInS = 10;
 
     public Task Start()
     {
-        Console.WriteLine($"Start camera {_camNumber} simulation.");
+        Console.WriteLine($"Start camera {camNumber} simulation.");
 
         while (true)
         {
+            var entryDelay = TimeSpan.FromMilliseconds(_rnd.Next(MinEntryDelayInMs, MaxEntryDelayInMs) + _rnd.NextDouble());
             try
             {
                 // simulate entry
-                TimeSpan entryDelay = TimeSpan.FromMilliseconds(_rnd.Next(_minEntryDelayInMS, _maxEntryDelayInMS) + _rnd.NextDouble());
                 Task.Delay(entryDelay).Wait();
-
+                var entryTimestamp = DateTime.Now;
+                
                 Task.Run(async () =>
                 {
                     // simulate entry
-                    DateTime entryTimestamp = DateTime.Now;
                     var vehicleRegistered = new VehicleRegistered
                     {
-                        Lane = _camNumber,
+                        Lane = camNumber,
                         LicenseNumber = GenerateRandomLicenseNumber(),
                         Timestamp = entryTimestamp
                     };
-                    await _trafficControlService.SendVehicleEntryAsync(vehicleRegistered);
+                    await trafficControlService.SendVehicleEntryAsync(vehicleRegistered);
                     Console.WriteLine($"Simulated ENTRY of vehicle with license-number {vehicleRegistered.LicenseNumber} in lane {vehicleRegistered.Lane}");
 
 
                     // simulate exit
-                    TimeSpan exitDelay = TimeSpan.FromSeconds(_rnd.Next(_minExitDelayInS, _maxExitDelayInS) + _rnd.NextDouble());
+                    var exitDelay = TimeSpan.FromSeconds(_rnd.Next(MinExitDelayInS, MaxExitDelayInS) + _rnd.NextDouble());
                     Task.Delay(exitDelay).Wait();
                     vehicleRegistered.Timestamp = DateTime.Now;
                     vehicleRegistered.Lane = _rnd.Next(1, 4);
-                    await _trafficControlService.SendVehicleExitAsync(vehicleRegistered);
+                    await trafficControlService.SendVehicleExitAsync(vehicleRegistered);
                     Console.WriteLine($"Simulated EXIT of vehicle with license-number {vehicleRegistered.LicenseNumber} in lane {vehicleRegistered.Lane}");
                 }).Wait();
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Camera {_camNumber} error: {ex.Message}");
+                Console.WriteLine($"Camera {camNumber} error: {ex.Message}");
             }
         }
+        
+        // ReSharper disable once FunctionNeverReturns
     }
 
     #region Private helper methods
 
-    private string _validLicenseNumberChars = "DFGHJKLNPRSTXYZ";
+    private const string ValidLicenseNumberChars = "DFGHJKLNPRSTXYZ";
 
     private string GenerateRandomLicenseNumber()
     {
-        int type = _rnd.Next(1, 9);
-        string kenteken = string.Empty;
-        switch (type)
+        var type = _rnd.Next(1, 9);
+        
+        var kenteken = type switch
         {
-            case 1: // 99-AA-99
-                kenteken = string.Format("{0:00}-{1}-{2:00}", _rnd.Next(1, 99), GenerateRandomCharacters(2), _rnd.Next(1, 99));
-                break;
-            case 2: // AA-99-AA
-                kenteken = string.Format("{0}-{1:00}-{2}", GenerateRandomCharacters(2), _rnd.Next(1, 99), GenerateRandomCharacters(2));
-                break;
-            case 3: // AA-AA-99
-                kenteken = string.Format("{0}-{1}-{2:00}", GenerateRandomCharacters(2), GenerateRandomCharacters(2), _rnd.Next(1, 99));
-                break;
-            case 4: // 99-AA-AA
-                kenteken = string.Format("{0:00}-{1}-{2}", _rnd.Next(1, 99), GenerateRandomCharacters(2), GenerateRandomCharacters(2));
-                break;
-            case 5: // 99-AAA-9
-                kenteken = string.Format("{0:00}-{1}-{2}", _rnd.Next(1, 99), GenerateRandomCharacters(3), _rnd.Next(1, 10));
-                break;
-            case 6: // 9-AAA-99
-                kenteken = string.Format("{0}-{1}-{2:00}", _rnd.Next(1, 9), GenerateRandomCharacters(3), _rnd.Next(1, 10));
-                break;
-            case 7: // AA-999-A
-                kenteken = string.Format("{0}-{1:000}-{2}", GenerateRandomCharacters(2), _rnd.Next(1, 999), GenerateRandomCharacters(1));
-                break;
-            case 8: // A-999-AA
-                kenteken = string.Format("{0}-{1:000}-{2}", GenerateRandomCharacters(1), _rnd.Next(1, 999), GenerateRandomCharacters(2));
-                break;
-        }
+            1 => // 99-AA-99
+                $"{_rnd.Next(1, 99):00}-{GenerateRandomCharacters(2)}-{_rnd.Next(1, 99):00}",
+            2 => // AA-99-AA
+                $"{GenerateRandomCharacters(2)}-{_rnd.Next(1, 99):00}-{GenerateRandomCharacters(2)}",
+            3 => // AA-AA-99
+                $"{GenerateRandomCharacters(2)}-{GenerateRandomCharacters(2)}-{_rnd.Next(1, 99):00}",
+            4 => // 99-AA-AA
+                $"{_rnd.Next(1, 99):00}-{GenerateRandomCharacters(2)}-{GenerateRandomCharacters(2)}",
+            5 => // 99-AAA-9
+                $"{_rnd.Next(1, 99):00}-{GenerateRandomCharacters(3)}-{_rnd.Next(1, 10)}",
+            6 => // 9-AAA-99
+                $"{_rnd.Next(1, 9)}-{GenerateRandomCharacters(3)}-{_rnd.Next(1, 10):00}",
+            7 => // AA-999-A
+                $"{GenerateRandomCharacters(2)}-{_rnd.Next(1, 999):000}-{GenerateRandomCharacters(1)}",
+            8 => // A-999-AA
+                $"{GenerateRandomCharacters(1)}-{_rnd.Next(1, 999):000}-{GenerateRandomCharacters(2)}",
+            _ => string.Empty
+        };
 
         return kenteken;
     }
 
     private string GenerateRandomCharacters(int aantal)
     {
-        char[] chars = new char[aantal];
-        for (int i = 0; i < aantal; i++)
+        var chars = new char[aantal];
+        
+        for (var i = 0; i < aantal; i++)
         {
-            chars[i] = _validLicenseNumberChars[_rnd.Next(_validLicenseNumberChars.Length - 1)];
+            chars[i] = ValidLicenseNumberChars[_rnd.Next(ValidLicenseNumberChars.Length - 1)];
         }
         return new string(chars);
     }
