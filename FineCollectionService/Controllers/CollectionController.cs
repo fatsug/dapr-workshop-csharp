@@ -25,7 +25,7 @@ public class CollectionController : ControllerBase
     [Topic("pubsub", "speedingviolations")]
     [Route("collectfine")]
     [HttpPost()]
-    public async Task<ActionResult> CollectFine(SpeedingViolation speedingViolation)
+    public async Task<ActionResult> CollectFine(SpeedingViolation speedingViolation, [FromServices] DaprClient daprClient)
     {
         decimal fine = _fineCalculator.CalculateFine(_fineCalculatorLicenseKey!, speedingViolation.ViolationInKmh);
 
@@ -50,8 +50,17 @@ public class CollectionController : ControllerBase
             speedingViolation.Timestamp.ToString("hh:mm:ss"));
 
         // send fine by email
-        // TODO
+        var body = EmailUtils.CreateEmailBody(speedingViolation, vehicleInfo, fineString);
 
+        var metadata = new Dictionary<string, string>
+        {
+            ["emailFrom"] = "noreply@cfca.gov",
+            ["emailTo"] = vehicleInfo.OwnerEmail,
+            ["subject"] = $"Speeding violation on the {speedingViolation.RoadId}"
+        };
+        
+        await daprClient.InvokeBindingAsync("sendmail", "create", body, metadata);
+        
         return Ok();
     }
 }
