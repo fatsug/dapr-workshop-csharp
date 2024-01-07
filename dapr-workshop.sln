@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficControlService", "Tr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VehicleRegistrationService", "VehicleRegistrationService\VehicleRegistrationService.csproj", "{4FD02D1D-DE9A-4BA6-B4C9-B7324D882E70}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficControl.Api", "TrafficControl.Api\TrafficControl.Api.csproj", "{884601A1-9FEE-4A36-99DE-2EFB14AB054C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrafficControl.Api.Contracts", "TrafficControl.Api.Contracts\TrafficControl.Api.Contracts.csproj", "{FC8D05A3-4B0D-4710-B4F7-D1D719EF67DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{4FD02D1D-DE9A-4BA6-B4C9-B7324D882E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FD02D1D-DE9A-4BA6-B4C9-B7324D882E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FD02D1D-DE9A-4BA6-B4C9-B7324D882E70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{884601A1-9FEE-4A36-99DE-2EFB14AB054C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{884601A1-9FEE-4A36-99DE-2EFB14AB054C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{884601A1-9FEE-4A36-99DE-2EFB14AB054C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{884601A1-9FEE-4A36-99DE-2EFB14AB054C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC8D05A3-4B0D-4710-B4F7-D1D719EF67DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC8D05A3-4B0D-4710-B4F7-D1D719EF67DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC8D05A3-4B0D-4710-B4F7-D1D719EF67DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC8D05A3-4B0D-4710-B4F7-D1D719EF67DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
